@@ -164,7 +164,12 @@ public class RegistryStorageFacadeImpl implements RegistryStorageFacade {
                 throw new ArtifactNotFoundException("ContentId: " + contentId);
             }
         }
-        return converter.convert(contentHandle, ArtifactTypeUtil.determineArtifactType(removeQuotedBrackets(contentHandle.content()), null, null, storage.resolveReferences(references)), references);
+        try {
+            return converter.convert(contentHandle, ArtifactTypeUtil.determineArtifactType(removeQuotedBrackets(contentHandle.content()), null, null, storage.resolveReferences(references)), references);
+        }
+        catch(Exception e) {
+            return converter.convert(contentHandle, ArtifactTypeUtil.determineArtifactType(contentHandle, null, null, storage.resolveReferences(references)), references);
+        }
     }
 
     @Override
@@ -176,7 +181,12 @@ public class RegistryStorageFacadeImpl implements RegistryStorageFacade {
                     }
                     StoredArtifactDto storedArtifact = storage.getArtifactVersion(null, subject, version);
                     Map<String, ContentHandle> resolvedReferences = storage.resolveReferences(storedArtifact.getReferences());
-                    return converter.convert(subject, storedArtifact, ArtifactTypeUtil.determineArtifactType(removeQuotedBrackets(storedArtifact.getContent().content()), null, null, resolvedReferences));
+                    try {
+                        return converter.convert(subject, storedArtifact, ArtifactTypeUtil.determineArtifactType(removeQuotedBrackets(storedArtifact.getContent().content()), null, null, resolvedReferences));
+                    }
+                    catch(Exception e) {
+                        return converter.convert(subject, storedArtifact, ArtifactTypeUtil.determineArtifactType(storedArtifact.getContent(), null, null, resolvedReferences));
+                    }
                 });
     }
 

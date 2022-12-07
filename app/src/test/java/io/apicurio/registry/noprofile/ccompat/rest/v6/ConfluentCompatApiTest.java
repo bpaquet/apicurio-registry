@@ -123,6 +123,8 @@ public class ConfluentCompatApiTest extends AbstractResourceTestBase {
                 .then()
                 .statusCode(200)
                 .body("", equalTo(new JsonPath(SCHEMA_SIMPLE_DEFAULT_QUOTED).getMap("")));
+
+        
     }
 
     @Test
