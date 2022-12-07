@@ -111,8 +111,7 @@ public class ConfluentCompatApiTest extends AbstractResourceTestBase {
                 .then()
                 .statusCode(200)
                 .body("id", Matchers.allOf(Matchers.isA(Integer.class), Matchers.greaterThanOrEqualTo(0)));
-        /*int id = */
-        res.extract().jsonPath().getInt("id");
+        int id = res.extract().jsonPath().getInt("id");
 
         this.waitForArtifact(SUBJECT);
 
@@ -124,7 +123,13 @@ public class ConfluentCompatApiTest extends AbstractResourceTestBase {
                 .statusCode(200)
                 .body("", equalTo(new JsonPath(SCHEMA_SIMPLE_DEFAULT_QUOTED).getMap("")));
 
-        
+        // Verify
+        given()
+                .when()
+                .get(getBasePath() + "/schemas/ids/{id}", id)
+                .then()
+                .statusCode(200)
+                .body(Matchers.containsString("EloquaContactRecordData"));
     }
 
     @Test
@@ -139,8 +144,7 @@ public class ConfluentCompatApiTest extends AbstractResourceTestBase {
                 .then()
                 .statusCode(200)
                 .body("id", Matchers.allOf(Matchers.isA(Integer.class), Matchers.greaterThanOrEqualTo(0)));
-        /*int id = */
-        res.extract().jsonPath().getInt("id");
+        int id = res.extract().jsonPath().getInt("id");
 
         this.waitForArtifact(SUBJECT);
 
@@ -151,6 +155,14 @@ public class ConfluentCompatApiTest extends AbstractResourceTestBase {
                 .then()
                 .statusCode(200)
                 .body("", equalTo(new JsonPath(SCHEMA_SIMPLE_JSON_QUOTED).getMap("")));
+
+        // Verify
+        given()
+                .when()
+                .get(getBasePath() + "/schemas/ids/{id}", id)
+                .then()
+                .statusCode(200)
+                .body(Matchers.containsString("prefix4.public.my_table"));
     }
 
     /**
