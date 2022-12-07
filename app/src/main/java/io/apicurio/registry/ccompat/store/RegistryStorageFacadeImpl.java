@@ -223,7 +223,13 @@ public class RegistryStorageFacadeImpl implements RegistryStorageFacade {
         try {
             Map<String, ContentHandle> resolvedReferences = resolveReferences(references);
 
-            final ArtifactType artifactType = ArtifactTypeUtil.determineArtifactType(removeQuotedBrackets(schema), null, null, resolvedReferences);
+            ArtifactType artifactType = null;
+            try {
+                artifactType = ArtifactTypeUtil.determineArtifactType(removeQuotedBrackets(schema), null, null, resolvedReferences);
+            }
+            catch(Exception e) {
+                artifactType = ArtifactTypeUtil.determineArtifactType(ContentHandle.create(schema), null, null, resolvedReferences);
+            }
             if (schemaType != null && !artifactType.value().equals(schemaType)) {
                 throw new UnprocessableEntityException(String.format("Given schema is not from type: %s", schemaType));
             }

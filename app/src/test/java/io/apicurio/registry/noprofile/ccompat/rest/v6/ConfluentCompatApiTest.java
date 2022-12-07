@@ -39,20 +39,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.CONFIG_BACKWARD;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.JSON_SCHEMA_SIMPLE_WRAPPED_WITH_TYPE;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.PROTOBUF_SCHEMA_SIMPLE_WRAPPED_WITH_TYPE;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_1_WRAPPED;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_2_WRAPPED;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_3_WRAPPED_TEMPLATE;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_INVALID_WRAPPED;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_SIMPLE;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_SIMPLE_DEFAULT_QUOTED;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_SIMPLE_WRAPPED;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_SIMPLE_WRAPPED_WITH_DEFAULT_QUOTED;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.SCHEMA_SIMPLE_WRAPPED_WITH_TYPE;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.V6_BASE_PATH;
-import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.VALID_AVRO_SCHEMA;
+import static io.apicurio.registry.noprofile.ccompat.rest.CCompatTestConstants.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.equalTo;
@@ -136,6 +123,32 @@ public class ConfluentCompatApiTest extends AbstractResourceTestBase {
                 .then()
                 .statusCode(200)
                 .body("", equalTo(new JsonPath(SCHEMA_SIMPLE_DEFAULT_QUOTED).getMap("")));
+    }
+
+    @Test
+    public void testJsonDefault() throws Exception {
+        final String SUBJECT = "subject1";
+        // POST
+        ValidatableResponse res = given()
+                .when()
+                .contentType(ContentTypes.COMPAT_SCHEMA_REGISTRY_STABLE_LATEST)
+                .body(SCHEMA_SIMPLE_WRAPPED_WITH_JSON_DEFAULT)
+                .post(getBasePath() + "/subjects/{subject}/versions", SUBJECT)
+                .then()
+                .statusCode(200)
+                .body("id", Matchers.allOf(Matchers.isA(Integer.class), Matchers.greaterThanOrEqualTo(0)));
+        /*int id = */
+        res.extract().jsonPath().getInt("id");
+
+        this.waitForArtifact(SUBJECT);
+
+        // Verify
+        given()
+                .when()
+                .get("/registry/v1/artifacts/{artifactId}", SUBJECT)
+                .then()
+                .statusCode(200)
+                .body("", equalTo(new JsonPath(SCHEMA_SIMPLE_JSON_QUOTED).getMap("")));
     }
 
     /**
